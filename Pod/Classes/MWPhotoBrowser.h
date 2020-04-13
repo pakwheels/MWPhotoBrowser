@@ -10,6 +10,8 @@
 #import "MWPhoto.h"
 #import "MWPhotoProtocol.h"
 #import "MWCaptionView.h"
+@import AVFoundation;
+@import AVKit;
 
 // Debug Logging
 #if 0 // Set to 1 to enable debug logging

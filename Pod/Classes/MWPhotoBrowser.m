@@ -13,6 +13,8 @@
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
 #import "XCDYouTubeKit.h"
+@import AVFoundation;
+@import AVKit;
 
 #define PADDING                  10
 
@@ -1693,8 +1695,25 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 }
 
 -(void)playYoutube:(NSString *)youtubeID{
-    XCDYouTubeVideoPlayerViewController *videoPlayerViewController = [[XCDYouTubeVideoPlayerViewController alloc] initWithVideoIdentifier:youtubeID];
-    [self presentMoviePlayerViewControllerAnimated:videoPlayerViewController];
+//    XCDYouTubeVideoPlayerViewController *videoPlayerViewController = [[XCDYouTubeVideoPlayerViewController alloc] initWithVideoIdentifier:youtubeID];
+//    [self presentMoviePlayerViewControllerAnimated:videoPlayerViewController];
+    AVPlayerViewController *playerViewController = [AVPlayerViewController new];
+    [self presentViewController:playerViewController animated:YES completion:nil];
+
+    __weak AVPlayerViewController *weakPlayerViewController = playerViewController;
+    [[XCDYouTubeClient defaultClient] getVideoWithIdentifier:youtubeID completionHandler:^(XCDYouTubeVideo * _Nullable video, NSError * _Nullable error) {
+        if (video)
+        {
+            NSDictionary *streamURLs = video.streamURLs;
+            NSURL *streamURL = streamURLs[XCDYouTubeVideoQualityHTTPLiveStreaming] ?: streamURLs[@(XCDYouTubeVideoQualityHD720)] ?: streamURLs[@(XCDYouTubeVideoQualityMedium360)] ?: streamURLs[@(XCDYouTubeVideoQualitySmall240)];
+            weakPlayerViewController.player = [AVPlayer playerWithURL:streamURL];
+            [weakPlayerViewController.player play];
+        }
+        else
+        {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }
+    }];
 }
 
 @end
